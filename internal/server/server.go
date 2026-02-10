@@ -10,8 +10,7 @@ import (
 
 	"voice_line_task/internal/config"
 	"voice_line_task/internal/handler"
-	"voice_line_task/internal/transcription"
-	"voice_line_task/internal/validation"
+	"voice_line_task/internal/service"
 )
 
 type Server struct {
@@ -22,8 +21,8 @@ type Server struct {
 func NewServer(cfg config.Config) *http.Server {
 	port, _ := strconv.Atoi(cfg.Port)
 
-	validator := validation.NewAudioValidator(cfg.MaxFileSizeMB)
-	transcriber := transcription.NewClient(cfg.GroqAPIKey)
+	validator := service.NewAudioValidator(cfg.MaxFileSizeMB)
+	transcriber := service.NewTranscriptionService(cfg.GroqAPIKey)
 	h := handler.NewHandler(validator, transcriber, cfg.MaxFileSizeMB)
 
 	NewServer := &Server{

@@ -6,17 +6,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"voice_line_task/internal/transcription"
-	"voice_line_task/internal/validation"
+	"voice_line_task/internal/service"
 )
 
 type Handler struct {
-	validator   *validation.AudioValidator
-	transcriber *transcription.Client
+	validator   *service.AudioValidator
+	transcriber *service.TranscriptionService
 	maxFileSize int64
 }
 
-func NewHandler(validator *validation.AudioValidator, transcriber *transcription.Client, maxFileSizeMB int) *Handler {
+func NewHandler(validator *service.AudioValidator, transcriber *service.TranscriptionService, maxFileSizeMB int) *Handler {
 	return &Handler{
 		validator:   validator,
 		transcriber: transcriber,
