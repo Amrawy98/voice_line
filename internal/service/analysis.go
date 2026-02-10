@@ -110,7 +110,6 @@ func (s *AnalysisService) Analyze(ctx context.Context, transcript string) (*Anal
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: transcript},
 		},
-		MaxTokens: 1024,
 		ResponseFormat: &responseFormat{
 			Type: "json_object",
 		},
