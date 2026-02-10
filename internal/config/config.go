@@ -11,6 +11,8 @@ type Config struct {
 	GroqAPIKey       string
 	OpenRouterAPIKey string
 	OpenRouterModel  string
+	NotionAPIKey     string
+	NotionParentID   string
 	MaxFileSizeMB    int
 }
 
@@ -20,6 +22,8 @@ func Load() (Config, error) {
 		GroqAPIKey:       os.Getenv("GROQ_API_KEY"),
 		OpenRouterAPIKey: os.Getenv("OPENROUTER_API_KEY"),
 		OpenRouterModel:  getEnvOrDefault("OPENROUTER_MODEL", "openrouter/free"),
+		NotionAPIKey:     os.Getenv("NOTION_API_KEY"),
+		NotionParentID:   os.Getenv("NOTION_PARENT_PAGE_ID"),
 		MaxFileSizeMB:    getEnvIntOrDefault("MAX_FILE_SIZE_MB", 19),
 	}
 
@@ -29,6 +33,14 @@ func Load() (Config, error) {
 
 	if cfg.OpenRouterAPIKey == "" {
 		return Config{}, fmt.Errorf("OPENROUTER_API_KEY is required")
+	}
+
+	if cfg.NotionAPIKey == "" {
+		return Config{}, fmt.Errorf("NOTION_API_KEY is required")
+	}
+
+	if cfg.NotionParentID == "" {
+		return Config{}, fmt.Errorf("NOTION_PARENT_PAGE_ID is required")
 	}
 
 	return cfg, nil

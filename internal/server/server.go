@@ -24,7 +24,8 @@ func NewServer(cfg config.Config) *http.Server {
 	validator := service.NewAudioValidator(cfg.MaxFileSizeMB)
 	transcriber := service.NewTranscriptionService(cfg.GroqAPIKey)
 	analyzer := service.NewAnalysisService(cfg.OpenRouterAPIKey, cfg.OpenRouterModel)
-	h := handler.NewHandler(validator, transcriber, analyzer, cfg.MaxFileSizeMB)
+	forwarder := service.NewForwardingService(cfg.NotionAPIKey, cfg.NotionParentID)
+	h := handler.NewHandler(validator, transcriber, analyzer, forwarder, cfg.MaxFileSizeMB)
 
 	NewServer := &Server{
 		port:    port,
