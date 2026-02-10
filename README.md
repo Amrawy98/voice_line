@@ -1,53 +1,86 @@
-# Project voice_line_task
+# Voice Line API
 
-One Paragraph of project description goes here
+Transcribes sales call audio → extracts structured insights → forwards to Notion.
 
-## Getting Started
+**Stack:** Go + Gin, Groq Whisper, OpenRouter, Notion API
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+---
 
-## MakeFile
+## Setup
 
-Run build make command with tests
+**Working API keys are included in `.env.example`** (expire in 7 days).
+
 ```bash
-make all
+cp .env.example .env
 ```
 
-Build the application
-```bash
-make build
-```
+---
 
-Run the application
+## Running Locally
+
 ```bash
 make run
 ```
-Create DB container
+
+Server starts on http://localhost:8080
+
+---
+
+## Running with Docker
+
 ```bash
+# Build and run
 make docker-run
-```
 
-Shutdown DB Container
-```bash
+# Or run in background
+docker-compose up -d
+
+# Stop
 make docker-down
+# Or
+docker-compose down
 ```
 
-DB Integrations Test:
+---
+
+## Testing
+
+### Health Check
 ```bash
-make itest
+curl http://localhost:8080/health
 ```
 
-Live reload the application:
+Expected: `{"status":"ok"}`
+
+### Upload Audio
 ```bash
-make watch
+curl -X POST \
+  -F "audio=@your-file.ogg;type=audio/ogg" \
+  http://localhost:8080/api/voice-lines
 ```
 
-Run the test suite:
-```bash
-make test
+**Supported formats:** MP3, OGG, WAV, M4A, FLAC, WEBM, MP4
+
+**Expected response (201 Created):**
+```json
+{
+  "transcript": "...",
+  "analysis": {
+    "deal_outlook": "moving_forward",
+    "customer_sentiment": "positive",
+    "summary": "...",
+    "positive_signals": ["..."],
+    "negative_signals": ["..."],
+    "next_steps": ["..."],
+    "deal_details": {
+      "company": "...",
+      "contact": "...",
+      "product": "..."
+    }
+  }
+}
 ```
 
-Clean up binary from the last build:
-```bash
-make clean
-```
+A new page will be created in Notion: **"Sales Call - Company - Feb 10, 2026"**
+
+**View results:** https://www.notion.so/Voice-Lines-303868eb1c9380cab58df46353609fa9

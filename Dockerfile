@@ -1,10 +1,11 @@
-FROM golang:1.24.4-alpine AS build
+FROM golang:1.25.7-alpine AS build
 
 WORKDIR /app
 
 COPY go.mod go.sum ./
 RUN go mod download
 
+COPY Makefile ./
 COPY . .
 
 RUN go build -o main cmd/api/main.go
