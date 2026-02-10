@@ -12,13 +12,15 @@ import (
 type Handler struct {
 	validator   *service.AudioValidator
 	transcriber *service.TranscriptionService
+	analyzer    *service.AnalysisService
 	maxFileSize int64
 }
 
-func NewHandler(validator *service.AudioValidator, transcriber *service.TranscriptionService, maxFileSizeMB int) *Handler {
+func NewHandler(validator *service.AudioValidator, transcriber *service.TranscriptionService, analyzer *service.AnalysisService, maxFileSizeMB int) *Handler {
 	return &Handler{
 		validator:   validator,
 		transcriber: transcriber,
+		analyzer:    analyzer,
 		maxFileSize: int64(maxFileSizeMB) * 1024 * 1024,
 	}
 }
@@ -71,7 +73,17 @@ func (h *Handler) CreateVoiceLine(c *gin.Context) {
 		return
 	}
 
+	analysis, err := h.analyzer.Analyze(c.Request.Context(), transcript)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error":   "analysis_failed",
+			"message": "failed to analyze transcript",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"transcript": transcript,
+		"analysis":   analysis,
 	})
 }
