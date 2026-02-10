@@ -6,17 +6,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"voice_line_task/internal/transcription"
 	"voice_line_task/internal/validation"
 )
 
 type Handler struct {
 	validator   *validation.AudioValidator
+	transcriber *transcription.Client
 	maxFileSize int64
 }
 
-func NewHandler(validator *validation.AudioValidator, maxFileSizeMB int) *Handler {
+func NewHandler(validator *validation.AudioValidator, transcriber *transcription.Client, maxFileSizeMB int) *Handler {
 	return &Handler{
 		validator:   validator,
+		transcriber: transcriber,
 		maxFileSize: int64(maxFileSizeMB) * 1024 * 1024,
 	}
 }
@@ -60,7 +63,16 @@ func (h *Handler) CreateVoiceLine(c *gin.Context) {
 		return
 	}
 
+	transcript, err := h.transcriber.Transcribe(c.Request.Context(), header.Filename, data)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{
+			"error":   "transcription_failed",
+			"message": "failed to transcribe audio",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "audio validated successfully",
+		"transcript": transcript,
 	})
 }

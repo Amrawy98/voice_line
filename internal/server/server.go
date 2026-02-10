@@ -10,6 +10,7 @@ import (
 
 	"voice_line_task/internal/config"
 	"voice_line_task/internal/handler"
+	"voice_line_task/internal/transcription"
 	"voice_line_task/internal/validation"
 )
 
@@ -22,7 +23,8 @@ func NewServer(cfg config.Config) *http.Server {
 	port, _ := strconv.Atoi(cfg.Port)
 
 	validator := validation.NewAudioValidator(cfg.MaxFileSizeMB)
-	h := handler.NewHandler(validator, cfg.MaxFileSizeMB)
+	transcriber := transcription.NewClient(cfg.GroqAPIKey)
+	h := handler.NewHandler(validator, transcriber, cfg.MaxFileSizeMB)
 
 	NewServer := &Server{
 		port:    port,
@@ -34,8 +36,8 @@ func NewServer(cfg config.Config) *http.Server {
 		Addr:         fmt.Sprintf(":%d", NewServer.port),
 		Handler:      NewServer.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  2 * time.Minute,
+		WriteTimeout: 90 * time.Second,
 	}
 
 	return server
