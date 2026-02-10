@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"voice_line_task/internal/config"
 	"voice_line_task/internal/server"
 )
 
@@ -38,16 +39,21 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
 
-	server := server.NewServer()
+	srv := server.NewServer(cfg)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
 	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+	go gracefulShutdown(srv, done)
 
-	err := server.ListenAndServe()
+	log.Printf("starting server on %s", srv.Addr)
+	err = srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}
